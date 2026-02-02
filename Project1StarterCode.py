@@ -24,7 +24,8 @@ def OpenImage(filename):
 # =====PATHFINDING HELPERS=====
 def Dijsktera(start, goal, terrain_costs, movement_type, TerrainImage):
     tracker = []
-    current = start
+    current = start 
+    visited = set()
     heapq.heappush(tracker, (0, start))
     parents = {start: None}
     cost_so_far = {start: 0}
@@ -32,6 +33,9 @@ def Dijsktera(start, goal, terrain_costs, movement_type, TerrainImage):
         current_cost, current = heapq.heappop(tracker)
         if current == goal:
             break
+        if current in visited:
+            continue
+        visited.add(current)
         
         if movement_type == 4:
             neighbors = [(current[0]+1, current[1]), (current[0]-1, current[1]), (current[0], current[1]+1), (current[0], current[1]-1)]
@@ -54,7 +58,7 @@ def Dijsktera(start, goal, terrain_costs, movement_type, TerrainImage):
                     cost_so_far[neighbor] = new_cost
                     heapq.heappush(tracker, (new_cost, neighbor))
                     parents[neighbor] = current
-        
+    return parents, cost_so_far, visited
 
 
 
@@ -80,6 +84,19 @@ if __name__ == '__main__':
         cost = int(keys[3])
         terrain_costs[rgb] = cost
     File.close()
+
+    movement_type = int(MovementArg)
+    parents, cost_so_far, visited = Dijsktera(Start, Destination, terrain_costs, movement_type, TerrainImage)
+    current = Destination
+    while current != Start:
+        SetRGB(TerrainImage, current, (255,0,0))
+        current = parents[current]
+    SetRGB(TerrainImage, Start, (0,255,0))
+    SaveImage(TerrainImage, "OutputDijkstra", "PNG")
+    print("Total Cost of Path: ", cost_so_far[Destination])
+
+
+
 
     
     
